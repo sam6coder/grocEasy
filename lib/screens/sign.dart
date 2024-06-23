@@ -7,6 +7,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:groceasy/screens/login.dart';
 import 'package:groceasy/utils/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:groceasy/models/user.dart';
 
 class SignScreen extends StatefulWidget {
   SignScreen({super.key});
@@ -23,6 +25,8 @@ class SignScreenState extends State<SignScreen> {
   TextEditingController emailController = TextEditingController();
 
   final emailFocusNode = FocusNode();
+  TextEditingController mobileController = TextEditingController();
+  final mobileFocusNode = FocusNode();
   TextEditingController passwordController = TextEditingController();
   TextEditingController addressController = TextEditingController();
   final addressFocusNode = FocusNode();
@@ -43,37 +47,74 @@ class SignScreenState extends State<SignScreen> {
     name = nameController.text.trim();
     String password = passwordController.text.trim();
     address = addressController.text.trim();
+    mobile = mobileController.text.trim();
+
 
     username = extractUsernameFromEmail(email);
     print('Username: $username');
 
-    if (email == "" || password == "" || name == "") {
+    if (email == "" || password == "" || name == "" || mobile=="") {
       Fluttertoast.showToast(
           msg: 'Please fill all the fields',
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           backgroundColor: Color(0xFFF3E5F5),
           textColor: Colors.black);
+    } else if (password.length < 6) {
+      Fluttertoast.showToast(
+          msg: 'Password must be atleast 6 characters',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Color(0xFFF3E5F5),
+          textColor: Colors.black);
+    }else if (mobile.length < 6) {
+      Fluttertoast.showToast(
+          msg: 'Mobile number must be of 10 digits',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Color(0xFFF3E5F5),
+          textColor: Colors.black);
     } else {
       try {
-        await prefs.setString("address", address);
+        // await prefs.setString("address", address);
 
         UserCredential userCredential = await FirebaseAuth.instance
             .createUserWithEmailAndPassword(email: email, password: password);
         Map<String, dynamic> newUserData = {
-          "Email": "$email",
-          "Password": "$password",
-          "Address": "$address",
-          "Name": "$name"
+          "Email": email,
+          "Password": password,
+          "Address": address,
+          "Name": name,
+          "Mobile":mobile,
         };
+        await FirebaseFirestore.instance.collection("Users").add(newUserData);
+        FirebaseDatabase database = FirebaseDatabase.instance;
+        DatabaseReference ref = database.ref();
+        String id = ref.child('Users').push().key ?? '';
 
-        final doc = await FirebaseFirestore.instance
-            .collection("Users")
-            .add(newUserData);
-        id = doc.id;
-        log(id);
+        Users user=Users(
+            Email: email,
+              Address: address,
+              Name: name,
+              Mobile_number:int.parse(mobile),
+        id:id);
+
+
+        await ref.child('Users').child(id).set(user.toJson());
+
+
         if (userCredential.user != null) {
           Navigator.pop(context);
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => LoginScreen()),
+          );
+          Fluttertoast.showToast(
+              msg: 'Account created',
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.BOTTOM,
+              backgroundColor: Color(0xFFF3E5F5),
+              textColor: Colors.black);
         }
         log("User created");
       } on FirebaseAuthException catch (ex) {
@@ -130,195 +171,229 @@ class SignScreenState extends State<SignScreen> {
                           ),
                           child: Padding(
                               padding: EdgeInsets.only(top: 20),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Center(
-                                    child: Text('Sign Up',
-                                        style: TextStyle(
-                                            fontSize: 50,
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold)),
-                                  ),
-                                  SizedBox(
-                                    height: 20,
-                                  ),
-                                  Text(
-                                      'Name',style:TextStyle(color: Colors.white,fontSize: 18)
-                                  ),
-                                  ConstrainedBox(
-                                    constraints: BoxConstraints.tight(
-                                        const Size(365, 50)),
-                                    child: TextFormField(
-                                      style:TextStyle(color:Colors.white),
-                                      focusNode: nameFocusNode,
-                                      keyboardType: TextInputType.name,
-                                      controller: nameController,
-                                      decoration: InputDecoration(
-                                        enabledBorder: UnderlineInputBorder(
-                                          borderSide: BorderSide(color: Colors.white),
-                                        ),
-                                        fillColor: Colors.white,
-                                        hintText: 'Enter your Name',
-                                        hintStyle: TextStyle(color:Colors.white70),
-
-                                        icon: Icon(Icons.person,color:Colors.white),
-                                      ),
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          nameFocusNode.requestFocus();
-                                          return 'Please enter your name';
-                                        }
-                                      },
-                                    ),
-                                  ),
-                                  SizedBox(height: 20),
-                                  Text(
-                                      'E-Mail',style:TextStyle(color: Colors.white,fontSize: 18)
-                                  ),
-                                  ConstrainedBox(
-                                    constraints: BoxConstraints.tight(
-                                        const Size(365, 50)),
-                                    child: TextFormField(
-                                      style:TextStyle(color:Colors.white),
-                                      focusNode: emailFocusNode,
-                                      keyboardType: TextInputType.emailAddress,
-                                      controller: emailController,
-                                      decoration: InputDecoration(
-                                        enabledBorder: UnderlineInputBorder(
-                                          borderSide: BorderSide(color: Colors.white),
-                                        ),
-                                        fillColor: Colors.white,
-                                        hintText: 'Enter your College Email-Id',
-                                        hintStyle: TextStyle(color:Colors.white70),
-
-                                        icon: Icon(Icons.mail,color:Colors.white),
-                                      ),
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          emailFocusNode.requestFocus();
-                                          return 'Please enter an email';
-                                        }
-                                      },
-                                    ),
-                                  ),
-                                  SizedBox(height: 20),
-                                  Text(
-                                      'Password',style:TextStyle(color: Colors.white,fontSize: 18)
-                                  ),
-                                  ConstrainedBox(
-                                    constraints: BoxConstraints.tight(
-                                        const Size(365, 50)),
-                                    child: TextFormField(
-                                      style:TextStyle(color:Colors.white),
-                                      obscureText: isObscured,
-                                      focusNode: passwordFocusNode,
-                                      keyboardType:
-                                          TextInputType.visiblePassword,
-                                      controller: passwordController,
-                                      decoration: InputDecoration(
-                                        enabledBorder: UnderlineInputBorder(
-                                          borderSide: BorderSide(color: Colors.white),
-                                        ),
-                                        hintText: 'Enter your Password',
-                                        hintStyle: TextStyle(color:Colors.white70),
-
-                                        icon: Icon(Icons.lock,color:Colors.white),
-                                        suffixIcon: IconButton(
-                                          padding: EdgeInsetsDirectional.only(
-                                              end: 12.0),
-                                          icon: isObscured
-                                              ? Icon(Icons.visibility,color:Colors.white)
-                                              : Icon(Icons.visibility_off,color:Colors.white),
-                                          onPressed: () {
-                                            setState(() {
-                                              isObscured = !isObscured;
-                                            });
-                                          },
-                                        ),
-                                      ),
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          passwordFocusNode.requestFocus();
-                                          return 'Please enter some text';
-                                        }
-                                        if (value.length < 6) {
-                                          passwordFocusNode.requestFocus();
-                                          return 'Password must be atleast 6 characters';
-                                        }
-                                      },
-                                    ),
-                                  ),
-                                  SizedBox(height: 20),
-                                  Text(
-                                      'Address',style:TextStyle(color: Colors.white,fontSize: 18)
-                                  ),
-                                  ConstrainedBox(
-                                    constraints: BoxConstraints.tight(
-                                        const Size(365, 50)),
-                                    child: TextFormField(
-                                      style:TextStyle(color:Colors.white),
-                                      focusNode: addressFocusNode,
-                                      keyboardType: TextInputType.streetAddress,
-                                      controller: addressController,
-                                      decoration: InputDecoration(
-                                        enabledBorder: UnderlineInputBorder(
-                                          borderSide: BorderSide(color: Colors.white),
-                                        ),
-                                        fillColor: Colors.white,
-                                        hintText: 'Enter your Address',
-                                        hintStyle: TextStyle(color:Colors.white70),
-
-                                        icon: Icon(Icons.add_location_alt,color:Colors.white),
-                                      ),
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          addressFocusNode.requestFocus();
-                                          return 'Please enter your address';
-                                        }
-                                      },
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: 50,
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 20.0),
-                                    child: TextButton(
-                                      style: ButtonStyle(
-                                        fixedSize: MaterialStateProperty.all(
-                                            Size(330, 50)),
-                                        backgroundColor:
-                                            MaterialStatePropertyAll<Color>(
-                                          Color(0xFF00E676),
-                                        ),
-                                      ),
-                                      onPressed: () {
-                                        createAccount();
-                                        Fluttertoast.showToast(
-                                            msg: 'Account created',
-                                            toastLength: Toast.LENGTH_SHORT,
-                                            gravity: ToastGravity.BOTTOM,
-                                            backgroundColor: Color(0xFFF3E5F5),
-                                            textColor: Colors.black);
-
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  LoginScreen()),
-                                        );
-                                      },
-                                      child: Text('Register',
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Center(
+                                      child: Text('Sign Up',
                                           style: TextStyle(
+                                              fontSize: 50,
                                               color: Colors.white,
-                                              fontSize: 17,
                                               fontWeight: FontWeight.bold)),
                                     ),
-                                  ),
-                                ],
+                                    SizedBox(
+                                      height: 20,
+                                    ),
+                                    Text('Name',
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 18)),
+                                    ConstrainedBox(
+                                      constraints: BoxConstraints.tight(
+                                          const Size(365, 50)),
+                                      child: TextFormField(
+                                        style: TextStyle(color: Colors.white),
+                                        focusNode: nameFocusNode,
+                                        keyboardType: TextInputType.name,
+                                        controller: nameController,
+                                        decoration: InputDecoration(
+                                          enabledBorder: UnderlineInputBorder(
+                                            borderSide:
+                                                BorderSide(color: Colors.white),
+                                          ),
+                                          fillColor: Colors.white,
+                                          hintText: 'Enter your Name',
+                                          hintStyle:
+                                              TextStyle(color: Colors.white70),
+                                          icon: Icon(Icons.person,
+                                              color: Colors.white),
+                                        ),
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            nameFocusNode.requestFocus();
+                                            return 'Please enter your name';
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                    SizedBox(height: 20),
+                                    Text('E-Mail',
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 18)),
+                                    ConstrainedBox(
+                                      constraints: BoxConstraints.tight(
+                                          const Size(365, 50)),
+                                      child: TextFormField(
+                                        style: TextStyle(color: Colors.white),
+                                        focusNode: emailFocusNode,
+                                        keyboardType: TextInputType.emailAddress,
+                                        controller: emailController,
+                                        decoration: InputDecoration(
+                                          enabledBorder: UnderlineInputBorder(
+                                            borderSide:
+                                                BorderSide(color: Colors.white),
+                                          ),
+                                          fillColor: Colors.white,
+                                          hintText: 'Enter your College Email-Id',
+                                          hintStyle:
+                                              TextStyle(color: Colors.white70),
+                                          icon: Icon(Icons.mail,
+                                              color: Colors.white),
+                                        ),
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            emailFocusNode.requestFocus();
+                                            return 'Please enter an email';
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                    SizedBox(height: 20),
+                                    Text('Password',
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 18)),
+                                    ConstrainedBox(
+                                      constraints: BoxConstraints.tight(
+                                          const Size(365, 50)),
+                                      child: TextFormField(
+                                        style: TextStyle(color: Colors.white),
+                                        obscureText: isObscured,
+                                        focusNode: passwordFocusNode,
+                                        keyboardType:
+                                            TextInputType.visiblePassword,
+                                        controller: passwordController,
+                                        decoration: InputDecoration(
+                                          enabledBorder: UnderlineInputBorder(
+                                            borderSide:
+                                                BorderSide(color: Colors.white),
+                                          ),
+                                          hintText: 'Enter your Password',
+                                          hintStyle:
+                                              TextStyle(color: Colors.white70),
+                                          icon: Icon(Icons.lock,
+                                              color: Colors.white),
+                                          suffixIcon: IconButton(
+                                            padding: EdgeInsetsDirectional.only(
+                                                end: 12.0),
+                                            icon: isObscured
+                                                ? Icon(Icons.visibility,
+                                                    color: Colors.white)
+                                                : Icon(Icons.visibility_off,
+                                                    color: Colors.white),
+                                            onPressed: () {
+                                              setState(() {
+                                                isObscured = !isObscured;
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            passwordFocusNode.requestFocus();
+                                            return 'Please enter some text';
+                                          }
+                                          if (value.length < 6) {
+                                            passwordFocusNode.requestFocus();
+                                            return 'Password must be atleast 6 characters';
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                    SizedBox(height: 20),
+                                    Text('Mobile Number',
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 18)),
+                                    ConstrainedBox(
+                                      constraints: BoxConstraints.tight(
+                                          const Size(365, 50)),
+                                      child: TextFormField(
+                                        style: TextStyle(color: Colors.white),
+                                        focusNode: mobileFocusNode,
+                                        keyboardType: TextInputType.streetAddress,
+                                        controller: mobileController,
+                                        decoration: InputDecoration(
+                                          enabledBorder: UnderlineInputBorder(
+                                            borderSide:
+                                            BorderSide(color: Colors.white),
+                                          ),
+                                          fillColor: Colors.white,
+                                          hintText: 'Enter your Mobile Number',
+                                          hintStyle:
+                                          TextStyle(color: Colors.white70),
+                                          icon: Icon(Icons.add_location_alt,
+                                              color: Colors.white),
+                                        ),
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            addressFocusNode.requestFocus();
+                                            return 'Please enter your mobile number';
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height:20
+                                    ),
+                                    Text('Address',
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 18)),
+                                    ConstrainedBox(
+                                      constraints: BoxConstraints.tight(
+                                          const Size(365, 50)),
+                                      child: TextFormField(
+                                        style: TextStyle(color: Colors.white),
+                                        focusNode: addressFocusNode,
+                                        keyboardType: TextInputType.streetAddress,
+                                        controller: addressController,
+                                        decoration: InputDecoration(
+                                          enabledBorder: UnderlineInputBorder(
+                                            borderSide:
+                                                BorderSide(color: Colors.white),
+                                          ),
+                                          fillColor: Colors.white,
+                                          hintText: 'Enter your Address',
+                                          hintStyle:
+                                              TextStyle(color: Colors.white70),
+                                          icon: Icon(Icons.add_location_alt,
+                                              color: Colors.white),
+                                        ),
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            addressFocusNode.requestFocus();
+                                            return 'Please enter your address';
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height: 50,
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 20.0),
+                                      child: TextButton(
+                                        style: ButtonStyle(
+                                          fixedSize: MaterialStateProperty.all(
+                                              Size(330, 50)),
+                                          backgroundColor:
+                                              MaterialStatePropertyAll<Color>(
+                                            Color(0xFF00E676),
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          createAccount();
+                                        },
+                                        child: Text('Register',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 17,
+                                                fontWeight: FontWeight.bold)),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               )),
                         ),
                       ),

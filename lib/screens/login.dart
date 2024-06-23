@@ -55,7 +55,7 @@ class LoginScreenState extends State<LoginScreen> {
         if (userCredential.user != null) {
           await prefs.setString("username", email);
 
-          await prefs.setString('logged in', 'login_student');
+          await prefs.setString('logged in', 'login');
 
           Fluttertoast.showToast(
               msg: 'Logged in successfully',
@@ -226,42 +226,43 @@ class LoginScreenState extends State<LoginScreen> {
                           height: 40,
                         ),
                         Padding(
-                          padding: const EdgeInsets.only(left: 20.0),
+                          padding: const EdgeInsets.only(left:20.0),
                           child: TextButton(
                             style: ButtonStyle(
-                              fixedSize:
-                                  MaterialStateProperty.all(Size(330, 50)),
-                              backgroundColor: MaterialStatePropertyAll<Color>(
-                                Color(0xFF00E676),
-                              ),
-                            ),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => SignScreen()),
-                              );
-                            },
-                            child: Text('New User',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.bold)),
-                          ),
+                                fixedSize: MaterialStateProperty.all(Size(330,50)),
+                                backgroundColor: MaterialStatePropertyAll<Color>(Color(0xFF00E676,),)),
+                            onPressed: (){
+                              login();
+                            }, child: Text('Log In',style:TextStyle(color:Colors.white,fontSize: 17,fontWeight: FontWeight.bold)),),
                         ),
+
                       ],
                     ),
                   ),
 
                   Padding(
-                    padding: const EdgeInsets.only(left:20.0),
+                    padding: const EdgeInsets.only(left: 20.0),
                     child: TextButton(
                       style: ButtonStyle(
-                        fixedSize: MaterialStateProperty.all(Size(330,50)),
-                        backgroundColor: MaterialStatePropertyAll<Color>(Color(0xFF00E676,),)),
-                      onPressed: (){
-                        login();
-                      }, child: Text('Log In',style:TextStyle(color:Colors.white,fontSize: 17,fontWeight: FontWeight.bold)),),
+                        fixedSize:
+                        MaterialStateProperty.all(Size(330, 50)),
+                        backgroundColor: MaterialStatePropertyAll<Color>(
+                          Color(0xFF00E676),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => SignScreen()),
+                        );
+                      },
+                      child: Text('New User',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 17,
+                              fontWeight: FontWeight.bold)),
+                    ),
                   ),
 
                   TextButton(

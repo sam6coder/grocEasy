@@ -61,9 +61,7 @@ class ForgotScreenState extends State<ForgotScreen>{
     else{
       try{
         await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-        Map<String, dynamic> newUserData = {
-          "Password": "$passwd"
-        };
+
         Fluttertoast.showToast(
             msg: 'Password reset',
             toastLength: Toast.LENGTH_SHORT,
@@ -71,8 +69,8 @@ class ForgotScreenState extends State<ForgotScreen>{
             backgroundColor: Color(0xFFF3E5F5),
             textColor: Colors.black
         );
-        await FirebaseFirestore.instance.collection("Users").doc(
-            id).update(newUserData).then((value)=>Navigator.of(context).pop());
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (context) => LoginScreen()));
       }on FirebaseAuthException catch(ex){
         log(ex.code.toString());
       }

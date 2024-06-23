@@ -31,12 +31,13 @@ class MyApp extends StatelessWidget {
     String? start=prefs.getString('logged in');
 
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
 
         useMaterial3: true,
       ),
-      home: (FirebaseAuth.instance.currentUser!=null)?start!=null?HomeScreen():HomeScreen():LoginScreen(),
+      home: (FirebaseAuth.instance.currentUser!=null)?start=='login'?HomeScreen():LoginScreen():LoginScreen(),
 
     );
   }

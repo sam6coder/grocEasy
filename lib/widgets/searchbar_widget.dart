@@ -5,7 +5,7 @@ import 'package:groceasy/utils/utils.dart';
 import 'package:groceasy/constants.dart';
 import 'package:groceasy/screens/search_screen.dart';
 
-class SaerchBarWidget extends StatelessWidget with PreferredSizeWidget{
+class SearchBarWidget extends StatefulWidget implements PreferredSizeWidget{
   final bool isReadOnly;
   final bool hasBackButton;
   SearchBarWidget({
@@ -18,6 +18,11 @@ class SaerchBarWidget extends StatelessWidget with PreferredSizeWidget{
   @override
   final Size preferredSize;
 
+  @override
+  State<SearchBarWidget> createState() => _SearchBarWidgetState();
+}
+
+class _SearchBarWidgetState extends State<SearchBarWidget> {
   OutlineInputBorder border = OutlineInputBorder(
     borderRadius: BorderRadius.circular(7),
     borderSide: const BorderSide(
@@ -41,7 +46,7 @@ class SaerchBarWidget extends StatelessWidget with PreferredSizeWidget{
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          hasBackButton
+          widget.hasBackButton
               ? IconButton(
               onPressed: () {
                 Navigator.pop(context);
@@ -70,9 +75,9 @@ class SaerchBarWidget extends StatelessWidget with PreferredSizeWidget{
                     ),
                   );
                 },
-                readOnly: isReadOnly,
+                readOnly: widget.isReadOnly,
                 onTap: () {
-                  if (isReadOnly) {
+                  if (widget.isReadOnly) {
                     Navigator.push(
                         context,
                         MaterialPageRoute(

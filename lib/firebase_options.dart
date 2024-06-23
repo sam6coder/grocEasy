@@ -27,10 +27,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.macOS:
         return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -72,10 +69,21 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyAD7KEuqB6jpYzKGzZGk-h6bpvbMsGvML8',
-    appId: '1:815653673603:ios:67a8a49858d468f37159b6',
+    appId: '1:815653673603:ios:5c3457838f78f16f7159b6',
     messagingSenderId: '815653673603',
     projectId: 'groceasy-89b73',
     storageBucket: 'groceasy-89b73.appspot.com',
-    iosBundleId: 'com.example.groceasy.RunnerTests',
+    iosBundleId: 'com.example.groceasy',
   );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyAZuWJ3vomBG1C-AUqeEAneLBbdq4OwNVg',
+    appId: '1:815653673603:web:f165a984498e3afd7159b6',
+    messagingSenderId: '815653673603',
+    projectId: 'groceasy-89b73',
+    authDomain: 'groceasy-89b73.firebaseapp.com',
+    storageBucket: 'groceasy-89b73.appspot.com',
+    measurementId: 'G-6042253SEB',
+  );
+
 }

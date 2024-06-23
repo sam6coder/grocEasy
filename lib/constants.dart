@@ -13,6 +13,7 @@ String name="";
 String id="";
 String address="";
 RxString addres="".obs;
+String mobile=0;
 
 const double kAppBarHeight = 80;
 

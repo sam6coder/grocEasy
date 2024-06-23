@@ -3,6 +3,8 @@ import 'package:groceasy/constants.dart';
 import 'package:groceasy/utils/utils.dart';
 import 'package:flutter/material.dart';
 
+import '../utils/color_themes.dart';
+
 class AdBannerWidget extends StatefulWidget {
   const AdBannerWidget({Key? key}) : super(key: key);
 

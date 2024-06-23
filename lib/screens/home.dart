@@ -34,29 +34,28 @@ class HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  loadUserInfo() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    email = (prefs.getString('username') ?? "");
-    address=(prefs.getString('address') ?? "");
-    username = extractUsernameFromEmail(email);
-    await prefs.setString("usernameM", username);
-
-    nameV.value = await FirebaseFirestore.instance
-        .collection('Users')
-        .doc(id)
-        .get()
-        .then((value) {
-      return value.get('Name');
-    });
-    log(nameV.value);
-    addres.value=await FirebaseFirestore.instance
-        .collection('Users')
-        .doc(id)
-        .get()
-        .then((value) {
-      return value.get('Address');
-    });
-  }
+  // loadUserInfo() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //
+  //   username = extractUsernameFromEmail(email);
+  //   await prefs.setString("usernameM", username);
+  //
+  //   nameV.value = await FirebaseFirestore.instance
+  //       .collection('Users')
+  //       .doc(id)
+  //       .get()
+  //       .then((value) {
+  //     return value.get('Name');
+  //   });
+  //   log(nameV.value);
+  //   addres.value=await FirebaseFirestore.instance
+  //       .collection('Users')
+  //       .doc(id)
+  //       .get()
+  //       .then((value) {
+  //     return value.get('Address');
+  //   });
+  // }
 
   void logout() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -70,10 +69,10 @@ class HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-      loadUserInfo();
+      // loadUserInfo();
       controller.addListener(() {
         setState(() {
-          loadUserInfo();
+          // loadUserInfo();
           offset=controller.position.pixels;
         });
 
@@ -84,6 +83,7 @@ class HomeScreenState extends State<HomeScreen> {
     return
     Scaffold(
       appBar: SearchBarWidget(
+
       isReadOnly:true,
           hasBackButton:false,
       // appBar: AppBar(
@@ -105,9 +105,11 @@ class HomeScreenState extends State<HomeScreen> {
       //   ],
       ),
       body:SingleChildScrollView(
+
         scrollDirection: Axis.vertical,
         child:Column(
           children:[
+
             AdBannerWidget(),
             SizedBox(
               height:20
